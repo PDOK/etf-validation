@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import csw.CSWClient;
+import csw.CSWClientException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
@@ -43,9 +45,8 @@ public class ETFTest {
     }
 
     @Test
-    public void testParallel() {
-        //Results results = Runner.path(".").parallel(5);
-        //results.setReportDir("target/surefire-reports");
+    public void testParallel() throws CSWClientException {
+        CSWClient.GenerateJSONFromMetadataRecords();
         Results results = Runner.parallel(getClass(), 4, "target/surefire-reports");
         generateReport(results.getReportDir());
         assertEquals(results.getFailCount(), 0, results.getErrorMessages());

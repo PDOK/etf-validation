@@ -2,25 +2,35 @@ Feature: Service test Atom
 
   Background:
 #    TODO: store in property
+    # Constants
     * def validatorBaseUrl = 'https://inspire.ec.europa.eu/validator/v2/'
+    * def reportDir = 'reports'
+    * def StaticUri = 'http://localhost:63342/etf-validation/'
+
+    * def records = read('../../../../atom-inspire-records.json')
     * url validatorBaseUrl
 
-  Scenario Outline: <testsuite> <label> <serviceEndpoint>
-    * print 'using: ', validatorBaseUrl
+    # Result handling
+    * def ETFReport = Java.type("report.ETFReport")
+    * def report = new ETFReport(validatorBaseUrl, reportDir, "atom")
+    * configure afterFeature = function(){ report.close() }
+
+  Scenario Outline: <protocol> <title> <label> <uuid> <serviceAccessPoint> <metadataStandardVersion> <getRecordByIdUrl>
+    * print 'using: ' + validatorBaseUrl + ' for ' + title
 
     * def testRunRequest =
       """
       {
         "label": "<label>",
         "executableTestSuiteIds": [
-          "<testsuite>"
+          "EID11571c92-3940-4f42-a6cd-5e2b1c6f4d93"
         ],
         "arguments": {
           "testRunTags": "<label>"
         },
         "testObject": {
           "resources": {
-            "serviceEndpoint": "<serviceEndpoint>"
+            "serviceEndpoint": "<serviceAccessPoint>"
           }
         }
       }
@@ -33,8 +43,6 @@ Feature: Service test Atom
     * def RunId = response.EtfItemCollection.testRuns.TestRun.id
     * def statusPath = "TestRuns/" + RunId
     * def progressPath = "TestRuns/" + RunId + "/progress"
-    * print 'status path: ', statusPath
-    * print 'progress path: ', progressPath
 
     # retry for 10 minutes (120 times every 5 seconds)
     * configure retry = { count: 120, interval: 5000 }
@@ -43,6 +51,7 @@ Feature: Service test Atom
     And retry until response.val == response.max
     When method get
 
+    # reset retry to default
     * configure retry = { count: 3, interval: 1000 }
 
     Given path statusPath
@@ -50,22 +59,10 @@ Feature: Service test Atom
     Then assert response.EtfItemCollection.testRuns.TestRun.status != "UNDEFINED"
 
     # save the status:
-    * def logURL = validatorBaseUrl + statusPath + "/log"
-    * def htmlReportURL = validatorBaseUrl + statusPath + ".html"
-    * def timestamp = new Date().getTime() + "_"
-    * def logPath = "target/" + timestamp + label + "_atom.log"
-    * def htmlPath = "target/" + timestamp + label + "_atom.html"
-
-    * def DownloadHTMLReport = Java.type("nl.pdok.DownloadHTMLReport")
-    * DownloadHTMLReport.download(logURL, logPath)
-    * DownloadHTMLReport.download(htmlReportURL, htmlPath)
-    * eval karate.embed('<p><a href="./' + htmlPath + '">HTML rapport</a></p><p><a href="./' + logPath + '">Logbestand</a></p>', 'text/html')
-
     * def status = response.EtfItemCollection.testRuns.TestRun.status
-    * print 'status: ', status
+    * report.downloadStatus(statusPath, status, protocol, label, title, uuid, serviceAccessPoint, metadataStandardVersion, getRecordByIdUrl)
+
     * assert status == "SUCCESS"
 
     Examples:
-      | testsuite                               | label         | serviceEndpoint                                                         |
-      | EID11571c92-3940-4f42-a6cd-5e2b1c6f4d93 | atom_inspire1 | https://geodata.nationaalgeoregister.nl/provincies/ps/atom/v1/index.xml |
-      | EID11571c92-3940-4f42-a6cd-5e2b1c6f4d93 | atom_inspire2 | https://geodata.nationaalgeoregister.nl/provincies/ps/atom/v1/index.xml |
+      | records |
