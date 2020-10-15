@@ -14,14 +14,14 @@ public class MustacheContext {
         this.feature = feature;
     }
 
-    static class Record {
-        private static Map<String, String> STATUS_COLOR_MAP  = new HashMap<String, String>() {{
-            put("PASSED", "bg-success");
-            put("PASSED_MANUAL", "bg-info");
-            put("FAILED", "bg-danger");
-            put("UNDEFINED", "bg-warning");
-            put("NOT_APPLICABLE", "bg-warning");
-            put("SKIPPED", "bg-warning");
+    public static class Record {
+        private Map<String, String> STATUS_COLOR_MAP  = new HashMap<String, String>() {{
+            put("PASSED", "table-success");
+            put("PASSED_MANUAL", "table-info");
+            put("FAILED", "table-danger");
+            put("UNDEFINED", "table-warning");
+            put("NOT_APPLICABLE", "table-warning");
+            put("SKIPPED", "table-warning");
         }};
 
         private final String htmlPath;
@@ -31,8 +31,8 @@ public class MustacheContext {
         private final String protocol;
         private final String uuid;
         private final String serviceAccessPoint;
-        private final String status;
-        private final String statusColor;
+        private String status;
+        private String statusColor;
         private final String metadataStandardVersion;
         private final String getRecordByIdUrl;
 
@@ -76,6 +76,11 @@ public class MustacheContext {
 
         public String getServiceAccessPoint() {
             return serviceAccessPoint;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+            this.statusColor = STATUS_COLOR_MAP.get(status);
         }
 
         public String getStatus() {

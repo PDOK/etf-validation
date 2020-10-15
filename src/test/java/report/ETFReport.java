@@ -31,14 +31,17 @@ public class ETFReport {
         new File(this.reportDir).mkdirs();
     }
 
-    public void downloadStatus(
-            String statusPath, String status, String protocol, String label, String title, String uuid, String serviceAccessPoint, String metadataStandardVersion, String getRecordByIdUrl) {
+    public MustacheContext.Record makeRecord(String label, String title, String protocol, String uuid, String serviceAccessPoint, String status, String metadataStandardVersion, String getRecordByIdUrl) {
+        return new MustacheContext.Record(label, title, protocol, uuid, serviceAccessPoint, status, metadataStandardVersion, getRecordByIdUrl);
+    }
+
+    public void downloadStatus(String statusPath, String label, MustacheContext.Record record) {
         String htmlPath = buildPath(label, ".html");
         String logPath = buildPath(label, ".log");
         download(statusPath + "/log", logPath);
         download(statusPath + ".html", htmlPath);
 
-        context.records.add(new MustacheContext.Record(label, title, protocol, uuid, serviceAccessPoint, status, metadataStandardVersion, getRecordByIdUrl));
+        context.records.add(record);
     }
 
     public void close() {

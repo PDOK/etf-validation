@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{feature}}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<section id="tabs" class="project-tab">
+    <div class="container">
+        <h2>{{feature}}</h2>
+        <div class="row">
+            <div class="col-md-12">
+                <table class="table table-striped" cellspacing="0">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th>Service</th>                <!-- Titel text + href serviceAccessPoint-->
+                        <th>ETF Validation Report</th>  <!-- <- text + href htmlPath-->
+                        <th>Log Report</th>             <!-- <- text + href logPath-->
+                        <th>NGR Metadata</th>      <!-- uuid text + href getRecordByIdUrl + title metadataStandardVersion-->
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {{#records}}
+                    <tr>
+                        <td><a href="{{ serviceAccessPoint }}">{{ title }}</a></td>
+                        <td class="{{ statusColor }}"><a href="{{ htmlPath }}">{{ protocol }}: {{ status }}</a></td>
+                        <td><a href="{{ logPath }}">{{ protocol }} validation log</a></td>
+                        <td><a href="{{ getRecordByIdUrl }}" title="{{ metadataStandardVersion }}">{{ uuid }}</a></td>
+                    </tr>
+                    {{/records}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>
