@@ -15,17 +15,19 @@ import java.nio.file.Paths;
 
 public class ETFReport {
 
-    private final MustacheContext context;
-    private final String baseUrl;
-    private final String feature;
-    private final String baseReportDir;
-    private final String reportDir;
-    private final String timestamp = String.valueOf(java.lang.System.currentTimeMillis());
+    private MustacheContext context;
+    private String baseUrl;
+    private String feature;
+    private String baseReportDir;
+    private String reportDir;
+    private String timestamp = String.valueOf(java.lang.System.currentTimeMillis());
+    private String fileNameBase;
 
-    public ETFReport(String baseUrl, String reportDir, String feature) {
+    public ETFReport(String baseUrl, String reportDir, String feature, String fileNameBase) {
         this.baseUrl = baseUrl;
         this.baseReportDir = reportDir;
         this.feature = feature;
+        this.fileNameBase = fileNameBase;
         this.reportDir = reportDir + "/" + timestamp + "/";
         this.context = new MustacheContext(feature);
         new File(this.reportDir).mkdirs();
@@ -47,7 +49,7 @@ public class ETFReport {
     public void close() {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            objectMapper.writeValue(new File(buildPath(feature, ".json")), context.records);
+            objectMapper.writeValue(new File(buildPath(fileNameBase, ".json")), context.records);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -60,8 +62,8 @@ public class ETFReport {
 
     public void writeTemplate() throws IOException {
         MustacheFactory mf = new DefaultMustacheFactory();
-        Mustache mustache = mf.compile(String.format("report/%sReport.mustache", feature));
-        File outputPath = new File(buildPath(feature, ".html"));
+        Mustache mustache = mf.compile(String.format("report/serviceReport.mustache"));
+        File outputPath = new File(buildPath(fileNameBase, ".html"));
         Writer writer = new OutputStreamWriter(new FileOutputStream(outputPath));
         mustache.execute(writer, context).flush();
     }

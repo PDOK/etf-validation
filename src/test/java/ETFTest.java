@@ -46,7 +46,7 @@ public class ETFTest {
 
     @Test
     public void testParallel() throws CSWClientException {
-        CSWClient.GenerateJSONFromMetadataRecords();
+//        CSWClient.GenerateJSONFromMetadataRecords();
         Results results = Runner.parallel(getClass(), 4, "target/surefire-reports");
         generateReport(results.getReportDir());
         assertEquals(results.getFailCount(), 0, results.getErrorMessages());
