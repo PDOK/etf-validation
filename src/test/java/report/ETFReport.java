@@ -14,46 +14,41 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class ETFReport {
-
     private MustacheContext context;
     private String baseUrl;
     private String feature;
     private String baseReportDir;
     private String reportDir;
-    private String timestamp = String.valueOf(java.lang.System.currentTimeMillis());
     private String fileNameBase;
+    private MustacheContext.Record currentRecord;
 
     public ETFReport(String baseUrl, String reportDir, String feature, String fileNameBase) {
         this.baseUrl = baseUrl;
         this.baseReportDir = reportDir;
         this.feature = feature;
         this.fileNameBase = fileNameBase;
-        this.reportDir = reportDir + "/" + timestamp + "/";
+        this.reportDir = reportDir;
         this.context = new MustacheContext(feature);
         new File(this.reportDir).mkdirs();
     }
 
-    public MustacheContext.Record makeRecord(String label, String title, String protocol, String uuid, String serviceAccessPoint, String status, String metadataStandardVersion, String getRecordByIdUrl) {
-        return new MustacheContext.Record(label, title, protocol, uuid, serviceAccessPoint, status, metadataStandardVersion, getRecordByIdUrl);
+    public void makeRecord(String label, String title, String protocol, String uuid, String serviceAccessPoint, String status, String metadataStandardVersion, String getRecordByIdUrl) {
+        MustacheContext.Record record = new MustacheContext.Record(label, title, protocol, uuid, serviceAccessPoint, status, metadataStandardVersion, getRecordByIdUrl);
+        context.addRecord(record);
     }
 
-    public void downloadStatus(String statusPath, String label, MustacheContext.Record record) {
+    public void downloadStatus(String statusPath, String label, String status) {
         String htmlPath = buildPath(label, ".html");
         String logPath = buildPath(label, ".log");
         download(statusPath + "/log", logPath);
         download(statusPath + ".html", htmlPath);
-
-        context.records.add(record);
+        this.context.setStatusForLabel(status, label);
     }
 
     public void close() {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            objectMapper.writeValue(new File(buildPath(fileNameBase, ".json")), context.records);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
+            objectMapper.writeValue(new File(buildPath(fileNameBase, ".json")), context.getRecords());
             writeTemplate();
         } catch (IOException e) {
             e.printStackTrace();
@@ -69,7 +64,7 @@ public class ETFReport {
     }
 
     private String buildPath(String label, String extension){
-        return String.format("%s%s%s", reportDir, label, extension);
+        return String.format("%s/%s%s", reportDir, label, extension);
     };
 
     private void download(String target, String filePath) {

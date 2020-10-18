@@ -1,21 +1,25 @@
 @parallel=false
-Feature: Service test Wms
+Feature: Service test Wfs
 
   Background:
-#    TODO: store in property
     # Constants
     * def serviceType = 'Conformance Class: Download Service - Direct WFS'
-    * def reportDir = 'reports'
-    * def StaticUri = 'http://localhost:63342/etf-validation/'
-    * def baseURL = 'https://inspire.ec.europa.eu/validator/v2/'
+    * def reportDir = karate.properties["reportDir"]
+    * def StaticUri = karate.properties["StaticUri"]
+    * def baseURL = karate.properties["baseURL"]
+    * print 'reportDir', reportDir
+    * print 'StaticUri', StaticUri
+    * print 'baseURL', baseURL
     * url baseURL
 
-    * def records = read('../../../wfs-inspire-records.copy.json')
+    * def records = read(karate.properties["wfsRecords"])
 
     # Result handling
     * def ETFReport = Java.type("report.ETFReport")
     * def report = new ETFReport(baseURL, reportDir, serviceType, "wfs")
     * configure afterFeature = function(){ report.close() }
+    * configure connectTimeout = 300000
+    * configure readTimeout = 300000
 
   Scenario Outline: <protocol> <title> <label> <uuid> <serviceAccessPoint> <metadataStandardVersion> <getRecordByIdUrl>
     * print 'using: ' + validatorBaseUrl + ' for ' + title
@@ -38,12 +42,11 @@ Feature: Service test Wms
         }
       }
       """
-    * print testRunRequest
 
     Given path 'TestRuns'
     And request testRunRequest
     When method post
-    Then assert responseStatus == 200 || responseStatus == 201
+    * print "statuscode WFS: ", responseStatus, serviceAccessPoint
     * def RunId = response.EtfItemCollection.testRuns.TestRun.id
     * def statusPath = "TestRuns/" + RunId
     * def progressPath = "TestRuns/" + RunId + "/progress"
@@ -66,8 +69,7 @@ Feature: Service test Wms
     * def status = response.EtfItemCollection.testRuns.TestRun.status
     * print status
 
-    * record.setStatus(status)
-    * report.downloadStatus(statusPath, label, record)
+    * report.downloadStatus(statusPath, label, status)
 
     * assert status == "PASSED" || status == "PASSED_MANUAL"
 
