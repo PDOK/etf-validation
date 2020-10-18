@@ -45,11 +45,32 @@ public class ETFTest {
     }
 
     @Test
-    public void testParallel() throws CSWClientException {
+    public void testParallel() throws CSWClientException, IOException {
         CSWClient.GenerateJSONFromMetadataRecords();
+
+        String timestamp = String.valueOf(java.lang.System.currentTimeMillis());
+
+        // PROPERTIES:
+        System.setProperty("StaticUri", "http://localhost:63342/etf-validation/");
+        System.setProperty("baseURL", "https://inspire.ec.europa.eu/validator/v2/");
+        System.setProperty("reportDir", "reports/" + timestamp);
+        System.setProperty("atomRecords", "../../../atom-inspire-records.json");
+        System.setProperty("wmsRecords", "../../../wms-inspire-records.json");
+        System.setProperty("wfsRecords", "../../../wfs-inspire-records.json");
+
         Results results = Runner.parallel(getClass(), 4, "target/surefire-reports");
         generateReport(results.getReportDir());
+        createSymbolicLink("reports/latest", timestamp);
+
         assertEquals(results.getFailCount(), 0, results.getErrorMessages());
     }
 
+    public void createSymbolicLink(String from, String to) throws IOException {
+        Path linkPath = Paths.get(from);
+        Path targetPath = Paths.get(to);
+        if (Files.exists(linkPath)) {
+            Files.delete(linkPath);
+        }
+        Files.createSymbolicLink(linkPath, targetPath);
+    }
 }

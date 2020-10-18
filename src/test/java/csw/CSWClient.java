@@ -190,7 +190,7 @@ public class CSWClient {
                     .filter(hashmap -> (String) hashmap.get("pdokServiceType") == "WFS")
                     .collect(Collectors.toList());
             String wfsRecordsJSONString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(wfsList);
-            WriteFile(atomRecordsJSONString, "wfs-inspire-records");
+            WriteFile(wfsRecordsJSONString, "wfs-inspire-records");
         }catch (JsonProcessingException e){
             throw new CSWClientException("JsonProcessingException while writing JSON files", e);
         }

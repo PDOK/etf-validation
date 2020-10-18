@@ -6,12 +6,40 @@ import java.util.List;
 import java.util.Map;
 
 public class MustacheContext {
-    List<Record> records;
-    String feature;
+    private List<Record> records;
+    private String feature;
 
     public MustacheContext(String feature) {
         this.records = new ArrayList<Record>();
         this.feature = feature;
+    }
+
+    public void addRecord(Record record) {
+        this.records.add(record);
+    }
+
+    public void setStatusForLabel(String status, String label) throws IllegalArgumentException {
+        boolean labelIsNotSet = true;
+        for (int i = 0; i < records.size(); i++) {
+            Record record = records.get(i);
+            if (record.getLabel().equals(label)) {
+                record.setStatus(status);
+                records.set(i, record);
+                labelIsNotSet = false;
+                break;
+            }
+        }
+        if (labelIsNotSet) {
+            throw new IllegalArgumentException();
+        }
+    }
+
+    public List<Record> getRecords() {
+        return records;
+    }
+
+    public String getFeature() {
+        return feature;
     }
 
     public static class Record {
